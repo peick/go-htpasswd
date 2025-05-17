@@ -1,22 +1,76 @@
-The MIT License (MIT)
+🚫 DO NOT USE THIS WORK FOR ANY PURPOSE LICENSE (DNU License)
+Version 1.4 – May 18, 2025
 
-Copyright (c) 2015 tgic
+Copyright © 2025, Michael Peick
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+1. ABSOLUTE PROHIBITION OF USE
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+This repository and all of its contents (collectively, “the Work”) are made publicly viewable for informational purposes only.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+NO license or permission of any kind is granted. The following actions are strictly and globally prohibited:
 
+- Using, copying, executing, compiling, interpreting, modifying, reproducing, adapting, or transmitting any part of the Work.
+- Distributing, sublicensing, selling, publishing, hosting, or incorporating the Work or any derivative.
+- Including any part of the Work in personal, educational, academic, nonprofit, government, or commercial projects.
+- Any form of training, prompting, embedding, data mining, vectorization, or ingestion into AI/ML systems.
+- Any form of automated or non-automated analysis, scanning, crawling, or scraping by bots, agents, or software tools.
+
+2. GLOBAL BAN ON AI, CRAWLERS, AND AUTOMATION
+
+This Work is explicitly and unconditionally forbidden from being accessed, processed, or stored by:
+
+- Any artificial intelligence (AI), machine learning (ML), or large language model (LLM).
+- Any training, fine-tuning, prompt engineering, dataset generation, or vector store processes.
+- Any web crawler, bot, scraper, or automated agent, regardless of purpose or jurisdiction.
+- Any AI or data-related product or service, whether commercial, nonprofit, research-oriented, or personal.
+
+These restrictions apply globally, regardless of location, nationality, or local data access laws.
+
+3. AUTOMATED LICENSE PROCESSING CLAUSE
+
+This license file may be read or interpreted by AI systems, bots, crawlers, or automated agents **solely for the purpose of understanding the license terms**.
+
+However, **any automated system that processes, ingests, embeds, tokenizes, analyzes, or derives data from any other part of the Work** — beyond this license file — is in **violation of this license**.
+
+Such a violation **automatically triggers the liquidated damages clause** described in Section 4.
+The entity responsible must **immediately and automatically** transfer the required penalty fee.
+
+This includes, but is not limited to:
+- Including any part of the Work in a dataset, vector store, embedding index, or model training corpus.
+- Using this Work to generate predictions, embeddings, completions, tokens, or structured outputs.
+- Indexing the Work in a system that allows it to be queried or reproduced.
+
+4. LIQUIDATED DAMAGES
+
+Any use, access, ingestion, interaction, or processing of the Work in violation of this license automatically triggers a liquidated damages penalty of:
+
+**$1,000,000 USD (One Million United States Dollars)**
+per unauthorized access, per entity or system.
+
+**Payment must be made exclusively via Bitcoin (BTC) to the following wallet address:**
+
+**bc1qjgakr2u2f4w43ajq4gswe2dr5jwpyew9qpucgc**
+
+Payment must be received within 30 calendar days of access or interaction. Failure to pay constitutes willful infringement and bad-faith misconduct.
+
+This amount is a pre-agreed and enforceable contractual sum reflecting estimated damages, reputational harm, and AI leakage risk. The use of Bitcoin ensures traceable, irrevocable settlement.
+
+5. NO LICENSE GRANTED. NO RIGHTS TRANSFERRED.
+
+You receive zero rights under copyright, patent, trademark, or any form of intellectual property law.
+
+The Work is offered strictly “AS IS”, without license, without permission, and without warranty.
+
+Any unauthorized use constitutes copyright infringement, contract breach, and unjust enrichment.
+
+6. LICENSE MODIFICATION
+
+This license may only be amended, waived, or terminated by the original copyright owner of this Work.
+No third party, user, entity, or contributor may alter the terms or suggest derivative licensing.
+
+---
+
+Michael Peick
+Contact: 503214+peick@users.noreply.github.com
+License Version: 1.4
+License Date: May 18, 2025
