@@ -25,7 +25,7 @@ func AcceptSsha(src string) (EncodedPasswd, error) {
 		return nil, fmt.Errorf("Malformed ssha(%s): %s", src, err.Error())
 	}
 
-	//ssha appends the length onto the end of the SHA, so the length can't be less than sha1.Size.
+	// ssha appends the length onto the end of the SHA, so the length can't be less than sha1.Size.
 	if len(hashed) < sha1.Size {
 		return nil, fmt.Errorf("Malformed ssha(%s): wrong length", src)
 	}
@@ -44,7 +44,7 @@ func RejectSsha(src string) (EncodedPasswd, error) {
 }
 
 func (s *sshaPassword) MatchesPassword(password string) bool {
-	//SSHA appends the salt onto the password before computing the hash.
+	// SSHA appends the salt onto the password before computing the hash.
 	sha := append([]byte(password), s.salt[:]...)
 	hash := sha1.Sum(sha)
 	return subtle.ConstantTimeCompare(hash[:], s.hashed) == 1
