@@ -27,7 +27,7 @@ import (
 // The password files consist of lines like "user:passwd-encoding". The user part is stripped off and
 // the passwd-encoding part is captured in an EncodedPasswd.
 type EncodedPasswd interface {
-	// Return true if the string matches the password.
+	// MatchesPassword returns true if the string matches the password.
 	// This may cache the result in the case of expensive comparison functions.
 	MatchesPassword(pw string) bool
 }
@@ -45,22 +45,36 @@ type PasswdParser func(pw string) (EncodedPasswd, error)
 
 type passwdTable map[string]EncodedPasswd
 
-// A BadLineHandler is used to notice bad lines in a password file. If not nil, it will be
-// called for each bad line with a descriptive error. Think about what you do with these, they
-// will sometimes contain hashed passwords.
-type BadLineHandler func(err error)
-
-// An File encompasses an Apache-style htpasswd file for HTTP Basic authentication
-type File struct {
+// A Htpasswd encompasses an Apache-style htpasswd file for HTTP Basic authentication
+type Htpasswd struct {
 	filePath string
 	passwds  atomic.Pointer[passwdTable]
 	parsers  []PasswdParser
 }
 
 // DefaultSystems is an array of PasswdParser including all builtin parsers. Notice that Plain is last, since it accepts anything
-var DefaultSystems = []PasswdParser{AcceptMd5, AcceptSha, AcceptBcrypt, AcceptSsha, AcceptCryptSha, AcceptPlain}
+var DefaultSystems = []PasswdParser{
+	Md5,
+	Sha,
+	Bcrypt,
+	Ssha,
+	CryptSha,
+	Plain,
+}
 
-// New creates an File from an Apache-style htpasswd file for HTTP Basic Authentication.
+type parameters struct {
+	parsers []PasswdParser
+}
+
+type Option func(*parameters)
+
+func WithParsers(parsers ...PasswdParser) Option {
+	return func(p *parameters) {
+		p.parsers = parsers
+	}
+}
+
+// New creates an Htpasswd from an Apache-style htpasswd file for HTTP Basic Authentication.
 //
 // The realm is presented to the user in the login dialog.
 //
@@ -72,13 +86,18 @@ var DefaultSystems = []PasswdParser{AcceptMd5, AcceptSha, AcceptBcrypt, AcceptSs
 //
 // bad is a function, which if not nil will be called for each malformed or rejected entry in
 // the password file.
-func New(filename string, parsers []PasswdParser, bad BadLineHandler) (*File, error) {
-	bf := File{
-		filePath: filename,
-		parsers:  parsers,
+func New(filename string, opts ...Option) (*Htpasswd, error) {
+	params := &parameters{parsers: DefaultSystems}
+	for _, opt := range opts {
+		opt(params)
 	}
 
-	if err := bf.Reload(bad); err != nil {
+	bf := Htpasswd{
+		filePath: filename,
+		parsers:  params.parsers,
+	}
+
+	if err := bf.Reload(); err != nil {
 		return nil, err
 	}
 
@@ -86,14 +105,19 @@ func New(filename string, parsers []PasswdParser, bad BadLineHandler) (*File, er
 }
 
 // NewFromReader is like new but reads from r instead of a named file. Calling
-// Reload on the returned File will result in an error; use
+// Reload on the returned Htpasswd will result in an error; use
 // ReloadFromReader instead.
-func NewFromReader(r io.Reader, parsers []PasswdParser, bad BadLineHandler) (*File, error) {
-	bf := File{
-		parsers: parsers,
+func NewFromReader(r io.Reader, opts ...Option) (*Htpasswd, error) {
+	params := &parameters{parsers: DefaultSystems}
+	for _, opt := range opts {
+		opt(params)
 	}
 
-	if err := bf.ReloadFromReader(r, bad); err != nil {
+	bf := Htpasswd{
+		parsers: params.parsers,
+	}
+
+	if err := bf.ReloadFromReader(r); err != nil {
 		return nil, err
 	}
 
@@ -102,7 +126,7 @@ func NewFromReader(r io.Reader, parsers []PasswdParser, bad BadLineHandler) (*Fi
 
 // Match checks the username and password combination to see if it represents
 // a valid account from the htpassword file.
-func (bf *File) Match(username, password string) bool {
+func (bf *Htpasswd) Match(username, password string) bool {
 	matcher, ok := (*bf.passwds.Load())[username]
 
 	if ok && matcher.MatchesPassword(password) {
@@ -113,45 +137,40 @@ func (bf *File) Match(username, password string) bool {
 	return false
 }
 
-// Reload rereads the htpassword file..
+// Reload rereads the htpasswd file.
 // You will need to call this to notice any changes to the password file.
 // This function is thread safe. Someone versed in fsnotify might make it
-// happen automatically. Likewise you might also connect a SIGHUP handler to
+// happen automatically. However, you might also connect a SIGHUP handler to
 // this function.
-func (bf *File) Reload(bad BadLineHandler) error {
-	// with the file...
+func (bf *Htpasswd) Reload() error {
 	f, err := os.Open(bf.filePath)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to open htpasswd file %s: %w", bf.filePath, err)
 	}
 	defer f.Close()
 
-	return bf.ReloadFromReader(f, bad)
+	return bf.ReloadFromReader(f)
 }
 
 // ReloadFromReader is like Reload but reads credentials from r instead of a named
-// file. If File was created by New, it is okay to call Reload and
+// file. If Htpasswd was created by New, it is okay to call Reload and
 // ReloadFromReader as desired.
-func (bf *File) ReloadFromReader(r io.Reader, bad BadLineHandler) error {
-	// ... and a new map ...
-	newPasswdMap := passwdTable{}
+func (bf *Htpasswd) ReloadFromReader(r io.Reader) error {
+	newPasswdMap := &passwdTable{}
 
-	// ... for each line ...
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		// ... add it to the map, noting errors along the way
-		if perr := bf.addHtpasswdUser(&newPasswdMap, line); perr != nil && bad != nil {
-			bad(perr)
+		if perr := bf.addHtpasswdUser(newPasswdMap, line); perr != nil {
+			return perr
 		}
 	}
 	if err := scanner.Err(); err != nil {
-		return fmt.Errorf("Error scanning htpasswd file: %s", err.Error())
+		return fmt.Errorf("scanning htpasswd file failed: %w", err)
 	}
 
-	// .. finally, safely swap in the new map
-	bf.passwds.Store(&newPasswdMap)
+	bf.passwds.Store(newPasswdMap)
 
 	return nil
 }
@@ -159,10 +178,15 @@ func (bf *File) ReloadFromReader(r io.Reader, bad BadLineHandler) error {
 // addHtpasswdUser processes a line from an htpasswd file and add it to the user/password map. We may
 // encounter some malformed lines, this will not be an error, but we will log them if
 // the caller has given us a logger.
-func (bf *File) addHtpasswdUser(pwmap *passwdTable, rawLine string) error {
-	// ignore white space lines
+func (bf *Htpasswd) addHtpasswdUser(pwmap *passwdTable, rawLine string) error {
+	// ignore empty line
 	line := strings.TrimSpace(rawLine)
 	if line == "" {
+		return nil
+	}
+
+	// ignore comment line. Inline comments are not allowed
+	if strings.HasPrefix(line, "#") {
 		return nil
 	}
 
@@ -188,6 +212,5 @@ func (bf *File) addHtpasswdUser(pwmap *passwdTable, rawLine string) error {
 		}
 	}
 
-	// No one liked this line
 	return fmt.Errorf("unable to recognize password for %s in %s", user, encoding)
 }

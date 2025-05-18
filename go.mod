@@ -1,4 +1,4 @@
-module github.com/tg123/go-htpasswd
+module github.com/peick/go-htpasswd
 
 go 1.23.0
 

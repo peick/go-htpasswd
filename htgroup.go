@@ -6,7 +6,7 @@
 //
 // Basic usage of this package:
 //
-// userGroups, groupLoadErr := htgroup.NewGroups("./my-group-file", nil)
+// userGroups, groupLoadErr := htgroup.NewHTGroup("./my-group-file", nil)
 // ok := userGroups.IsUserInGroup(username, "admins")
 package htpasswd
 
@@ -29,23 +29,23 @@ type HTGroup struct {
 	userGroups atomic.Pointer[userGroupMap]
 }
 
-// NewGroups creates a HTGroup from an Apache-style group file.
+// NewHTGroup creates a HTGroup from an Apache-style group file.
 //
 // The filename must exist and be accessible to the process, as well as being a valid group file.
 //
 // bad is a function, which if not nil will be called for each malformed or rejected entry in the group file.
-func NewGroups(filename string, bad BadLineHandler) (*HTGroup, error) {
+func NewHTGroup(filename string) (*HTGroup, error) {
 	htGroup := HTGroup{
 		filePath: filename,
 	}
-	return &htGroup, htGroup.ReloadGroups(bad)
+	return &htGroup, htGroup.Reload()
 }
 
-// NewGroupsFromReader is like NewGroups but reads from r instead of a named file.
-func NewGroupsFromReader(r io.Reader, bad BadLineHandler) (*HTGroup, error) {
+// NewHTGroupsFromReader is like NewHTGroup but reads from r instead of a named file.
+func NewHTGroupsFromReader(r io.Reader) (*HTGroup, error) {
 	htGroup := HTGroup{}
 
-	readFileErr := htGroup.ReloadGroupsFromReader(r, bad)
+	readFileErr := htGroup.ReloadFromReader(r)
 	if readFileErr != nil {
 		return nil, readFileErr
 	}
@@ -53,40 +53,47 @@ func NewGroupsFromReader(r io.Reader, bad BadLineHandler) (*HTGroup, error) {
 	return &htGroup, nil
 }
 
-// ReloadGroups rereads the group file.
-func (htGroup *HTGroup) ReloadGroups(bad BadLineHandler) error {
-	file, err := os.Open(htGroup.filePath)
+// Reload rereads the group file.
+func (g *HTGroup) Reload() error {
+	file, err := os.Open(g.filePath)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	return htGroup.ReloadGroupsFromReader(file, bad)
+	return g.ReloadFromReader(file)
 }
 
-// ReloadGroupsFromReader rereads the group file from a Reader.
-func (htGroup *HTGroup) ReloadGroupsFromReader(r io.Reader, bad BadLineHandler) error {
+// ReloadFromReader rereads the group file from a Reader.
+func (g *HTGroup) ReloadFromReader(r io.Reader) error {
 	userGroups := make(userGroupMap)
-	scanner := bufio.NewScanner(r)
 
+	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		line := scanner.Text()
-		if lineErr := processLine(&userGroups, line); lineErr != nil && bad != nil {
-			bad(lineErr)
+
+		if err := processLine(&userGroups, line); err != nil {
+			return err
 		}
 	}
-	if scannerErr := scanner.Err(); scannerErr != nil {
-		return fmt.Errorf("Error scanning group file: %s", scannerErr.Error())
+	if err := scanner.Err(); err != nil {
+		return fmt.Errorf("scanning group file failed: %w", err)
 	}
 
-	htGroup.userGroups.Store(&userGroups)
+	g.userGroups.Store(&userGroups)
 
 	return nil
 }
 
 func processLine(userGroups *userGroupMap, rawLine string) error {
+	// ignore empty line
 	line := strings.TrimSpace(rawLine)
 	if line == "" {
+		return nil
+	}
+
+	// ignore comment line. Inline comments are not allowed
+	if strings.HasPrefix(line, "#") {
 		return nil
 	}
 
@@ -109,15 +116,15 @@ func processLine(userGroups *userGroupMap, rawLine string) error {
 
 // IsUserInGroup checks whether the user is in a group.
 // Returns true of user is in that group, otherwise false.
-func (htGroup *HTGroup) IsUserInGroup(user string, group string) bool {
-	groups := htGroup.GetUserGroups(user)
+func (g *HTGroup) IsUserInGroup(user string, group string) bool {
+	groups := g.GetUserGroups(user)
 	return containsGroup(groups, group)
 }
 
 // GetUserGroups reads all groups of a user.
 // Returns all groups as a string array or an empty array.
-func (htGroup *HTGroup) GetUserGroups(user string) []string {
-	groups := (*htGroup.userGroups.Load())[user]
+func (g *HTGroup) GetUserGroups(user string) []string {
+	groups := (*g.userGroups.Load())[user]
 
 	if groups == nil {
 		return []string{}

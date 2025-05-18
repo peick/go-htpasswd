@@ -22,7 +22,7 @@ const PrefixCryptSha512 = "$6$"
 const Separator = "$"
 
 // Accepts valid passwords
-func AcceptCryptSha(src string) (EncodedPasswd, error) {
+func CryptSha(src string) (EncodedPasswd, error) {
 	if !strings.HasPrefix(src, PrefixCryptSha256) && !strings.HasPrefix(src, PrefixCryptSha512) {
 		return nil, nil
 	}
@@ -62,8 +62,7 @@ func RejectCryptSha(src string) (EncodedPasswd, error) {
 	return nil, fmt.Errorf("crypt-sha password rejected: %s", src)
 }
 
-func shaCrypt(password string, rounds string, salt string, prefix string) string {
-
+func shaCrypt(password string, rounds string, salt string, prefix string) (string, error) {
 	var ret string
 	var sb strings.Builder
 	sb.WriteString(prefix)
@@ -74,19 +73,30 @@ func shaCrypt(password string, rounds string, salt string, prefix string) string
 	sb.WriteString(salt)
 	totalSalt := sb.String()
 
+	var err error
 	if prefix == PrefixCryptSha512 {
-		crypt := crypt.SHA512.New()
-		ret, _ = crypt.Generate([]byte(password), []byte(totalSalt))
-
+		c := crypt.SHA512.New()
+		ret, err = c.Generate([]byte(password), []byte(totalSalt))
+		if err != nil {
+			return "", err
+		}
 	} else if prefix == PrefixCryptSha256 {
-		crypt := crypt.SHA256.New()
-		ret, _ = crypt.Generate([]byte(password), []byte(totalSalt))
+		c := crypt.SHA256.New()
+		ret, err = c.Generate([]byte(password), []byte(totalSalt))
+		if err != nil {
+			return "", err
+		}
+	} else {
+		return "", fmt.Errorf("invalid prefix: %s", prefix)
 	}
 
-	return ret[len(totalSalt)+1:]
+	return ret[len(totalSalt)+1:], nil
 }
 
 func (m *cryptPassword) MatchesPassword(pw string) bool {
-	hashed := shaCrypt(pw, m.rounds, m.salt, m.prefix)
+	hashed, err := shaCrypt(pw, m.rounds, m.salt, m.prefix)
+	if err != nil {
+		return false
+	}
 	return constantTimeEquals(hashed, m.hashed)
 }

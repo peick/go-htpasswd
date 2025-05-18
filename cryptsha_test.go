@@ -36,7 +36,7 @@ func Test_CryptSha(t *testing.T) {
 		} else {
 			text = fmt.Sprintf(v.prefix+"%s$%s", v.salt, v.hashed)
 		}
-		testParserGood(t, "crypt-sha256", AcceptCryptSha, RejectCryptSha, text, v.password)
+		testParserGood(t, "crypt-sha256", CryptSha, RejectCryptSha, text, v.password)
 	}
 
 	for _, v := range sha512TestData {
@@ -47,11 +47,11 @@ func Test_CryptSha(t *testing.T) {
 			text = fmt.Sprintf(v.prefix+"%s$%s", v.salt, v.hashed)
 		}
 
-		testParserGood(t, "crypt-sha512", AcceptCryptSha, RejectCryptSha, text, v.password)
+		testParserGood(t, "crypt-sha512", CryptSha, RejectCryptSha, text, v.password)
 	}
 
-	testParserBad(t, "crypt-sha256", AcceptCryptSha, RejectCryptSha, "$5$nosalt")
-	testParserBad(t, "crypt-sha512", AcceptCryptSha, RejectCryptSha, "$6$nosalt")
-	testParserNot(t, "crypt-sha512", AcceptCryptSha, RejectCryptSha, "plain")
-	testParserNot(t, "crypt-sha512", AcceptCryptSha, RejectCryptSha, "{SHA}plain")
+	testParserBad(t, "crypt-sha256", CryptSha, RejectCryptSha, "$5$nosalt")
+	testParserBad(t, "crypt-sha512", CryptSha, RejectCryptSha, "$6$nosalt")
+	testParserNot(t, "crypt-sha512", CryptSha, RejectCryptSha, "plain")
+	testParserNot(t, "crypt-sha512", CryptSha, RejectCryptSha, "{SHA}plain")
 }

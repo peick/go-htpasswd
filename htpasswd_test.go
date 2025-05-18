@@ -243,7 +243,7 @@ var testCryptSha512 string
 func testSystemReader(t *testing.T, name string, contents string) {
 	r := strings.NewReader(contents)
 
-	htp, err := NewFromReader(r, DefaultSystems, nil)
+	htp, err := NewFromReader(r)
 	if err != nil {
 		t.Fatalf("Failed to read htpasswd reader")
 	}
@@ -274,7 +274,7 @@ func testSystem(t *testing.T, name string, contents string) {
 		t.Fatalf("Failed to close temporary file: %s", err.Error())
 	}
 
-	htp, err := New(f.Name(), DefaultSystems, nil)
+	htp, err := New(f.Name())
 	if err != nil {
 		t.Fatalf("Failed to read htpasswd file")
 	}

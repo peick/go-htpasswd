@@ -8,9 +8,9 @@ type plainPassword struct {
 	password string
 }
 
-// AcceptPlain accepts any password in the plain text encoding.
+// Plain accepts any password in the plain text encoding.
 // Be careful: This matches any line, so it *must* be the last parser in you list.
-func AcceptPlain(pw string) (EncodedPasswd, error) {
+func Plain(pw string) (EncodedPasswd, error) {
 	return &plainPassword{pw}, nil
 }
 

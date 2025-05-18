@@ -214,9 +214,9 @@ var shaTestData = []shaDatum{
 
 func Test_Sha(t *testing.T) {
 	for _, v := range shaTestData {
-		testParserGood(t, "sha", AcceptSha, RejectSha, v.hashed, v.password)
+		testParserGood(t, "sha", Sha, RejectSha, v.hashed, v.password)
 	}
-	testParserBad(t, "sha", AcceptSha, RejectSha, "{SHA}Ys23Ag/5IOWqZCw9dHwH00=")
-	testParserBad(t, "sha", AcceptSha, RejectSha, "{SHA}plaintext")
-	testParserNot(t, "sha", AcceptSha, RejectSha, "plaintext")
+	testParserBad(t, "sha", Sha, RejectSha, "{SHA}Ys23Ag/5IOWqZCw9dHwH00=")
+	testParserBad(t, "sha", Sha, RejectSha, "{SHA}plaintext")
+	testParserNot(t, "sha", Sha, RejectSha, "plaintext")
 }

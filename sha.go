@@ -12,8 +12,8 @@ type shaPassword struct {
 	hashed []byte
 }
 
-// AcceptSha accepts valid SHA encoded passwords.
-func AcceptSha(src string) (EncodedPasswd, error) {
+// Sha accepts valid SHA encoded passwords.
+func Sha(src string) (EncodedPasswd, error) {
 	if !strings.HasPrefix(src, "{SHA}") {
 		return nil, nil
 	}

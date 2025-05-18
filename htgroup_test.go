@@ -27,7 +27,7 @@ func TestGroups(t *testing.T) {
 	f.Close()
 
 	// Read the file and check the contents
-	htGroup, err := NewGroups(filename, nil)
+	htGroup, err := NewHTGroup(filename)
 	assert.NoError(t, err)
 	assert.True(t, htGroup.IsUserInGroup("user1", "users"))
 	assert.True(t, htGroup.IsUserInGroup("user1", "admins"))
@@ -54,7 +54,7 @@ func TestGroups(t *testing.T) {
 	defer os.Remove(filename)
 
 	// Reread the file and check the contents again, user2 should now be member of admins too.
-	reloadError := htGroup.ReloadGroups(nil)
+	reloadError := htGroup.Reload()
 	assert.NoError(t, reloadError)
 	assert.True(t, htGroup.IsUserInGroup("user1", "users"))
 	assert.True(t, htGroup.IsUserInGroup("user1", "admins"))
@@ -70,7 +70,7 @@ func TestGroups(t *testing.T) {
 
 	// Test load from reader as well
 	r := strings.NewReader(contents2)
-	htGroup, err = NewGroupsFromReader(r, nil)
+	htGroup, err = NewHTGroupsFromReader(r)
 	assert.NoError(t, err)
 	assert.True(t, htGroup.IsUserInGroup("user1", "users"))
 	assert.True(t, htGroup.IsUserInGroup("user1", "admins"))

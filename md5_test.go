@@ -436,15 +436,15 @@ func Test_apr1Md5(t *testing.T) {
 func Test_Md5(t *testing.T) {
 	for _, v := range apr1TestData {
 		text := fmt.Sprintf(v.prefix+"%s$%s", v.salt, v.hashed)
-		testParserGood(t, "md5", AcceptMd5, RejectMd5, text, v.password)
+		testParserGood(t, "md5", Md5, RejectMd5, text, v.password)
 	}
 
 	for _, v := range md5CryptTestData {
 		text := fmt.Sprintf(v.prefix+"%s$%s", v.salt, v.hashed)
-		testParserGood(t, "md5", AcceptMd5, RejectMd5, text, v.password)
+		testParserGood(t, "md5", Md5, RejectMd5, text, v.password)
 	}
-	testParserBad(t, "md5", AcceptMd5, RejectMd5, "$apr1$nosalt")
-	testParserBad(t, "md5", AcceptMd5, RejectMd5, "$1$nosalt")
-	testParserNot(t, "md5", AcceptMd5, RejectMd5, "plain")
-	testParserNot(t, "md5", AcceptMd5, RejectMd5, "{SHA}plain")
+	testParserBad(t, "md5", Md5, RejectMd5, "$apr1$nosalt")
+	testParserBad(t, "md5", Md5, RejectMd5, "$1$nosalt")
+	testParserNot(t, "md5", Md5, RejectMd5, "plain")
+	testParserNot(t, "md5", Md5, RejectMd5, "{SHA}plain")
 }

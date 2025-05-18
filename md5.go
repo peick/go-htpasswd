@@ -19,8 +19,8 @@ const PrefixCryptMd5 = "$1$"
 // PrefixCryptApr1 is the Apache Apr1 hash prefix
 const PrefixCryptApr1 = "$apr1$"
 
-// AcceptMd5 accepts valid MD5 encoded passwords
-func AcceptMd5(src string) (EncodedPasswd, error) {
+// Md5 accepts valid MD5 encoded passwords
+func Md5(src string) (EncodedPasswd, error) {
 	if !strings.HasPrefix(src, PrefixCryptApr1) && !strings.HasPrefix(src, PrefixCryptMd5) {
 		return nil, nil
 	}

@@ -5,7 +5,7 @@ import (
 )
 
 func Test_Plain(t *testing.T) {
-	testParserGood(t, "plain", AcceptPlain, RejectPlain, "bar", "bar")
+	testParserGood(t, "plain", Plain, RejectPlain, "bar", "bar")
 	// testParserBad() plain takes anything
 	// testParserNot() plain takes anything
 }
